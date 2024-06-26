@@ -252,17 +252,33 @@
         }
     }
 
-    function fetchPtoHours() {
+    async function fetchPtoHours() {
         const weekEnding = document.getElementById('week-ending').value;
         if (!weekEnding) return;
 
-        // Example: Fetch PTO data from an API (replace with your implementation)
-        // Replace with your actual API endpoint and logic to fetch PTO hours
-        // Mock example:
-        const ptoHours = Math.floor(Math.random() * 40); // Example: Random PTO hours
+        const apiToken = 'patdDuaFt5dF0uNEF.b7b595e264bdbfe655efbcbf02fbfcbdf562c4b0807fe5464305b4feb48d07f2';
+        const baseId = 'Corporate';
+        const tableId = 'All Active Employees';
+        const url = `https://api.airtable.com/v0/${baseId}/${tableId}?filterByFormula={WeekEnding}="${weekEnding}"`;
 
-        document.getElementById('pto-hours').value = ptoHours;
-        updateTimeWorked();
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiToken}`
+                }
+            });
+            const data = await response.json();
+            if (data.records && data.records.length > 0) {
+                const ptoHours = data.records[0].fields.PTOHours;
+                document.getElementById('pto-hours').value = ptoHours;
+            } else {
+                document.getElementById('pto-hours').value = 0;
+            }
+            updateTimeWorked();
+        } catch (error) {
+            console.error('Error fetching PTO hours:', error);
+            document.getElementById('pto-hours').value = 0;
+        }
     }
 
     function updateTimeWorked() {
